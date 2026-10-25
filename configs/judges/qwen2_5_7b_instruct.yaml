@@ -1,0 +1,10 @@
+# Small local judge for development runs. NOT the official judge: numbers are not comparable
+# with the V-STaR paper. Fits next to nothing else on a 32GB GPU (bf16 ~16GB).
+name: qwen2_5_7b_instruct
+type: hf
+model_path: Qwen/Qwen2.5-7B-Instruct
+dtype: bfloat16
+device_map: cuda
+generation:
+  max_new_tokens: 16
+  do_sample: false

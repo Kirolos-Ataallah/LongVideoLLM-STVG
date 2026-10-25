@@ -1,0 +1,12 @@
+# Official V-STaR VQA judge. Too large for a single 32GB GPU: serve it elsewhere, e.g.
+#   vllm serve Qwen/Qwen2.5-72B-Instruct --tensor-parallel-size 4 --port 8000
+# and point base_url at the server (override: judge.base_url=http://host:8000/v1).
+name: qwen2_5_72b_instruct
+type: openai
+model_path: Qwen/Qwen2.5-72B-Instruct
+base_url: ${oc.env:STVG_JUDGE_URL,http://localhost:8000/v1}
+api_key_env: STVG_JUDGE_API_KEY
+concurrency: 32
+generation:
+  max_tokens: 16
+  temperature: 0.0

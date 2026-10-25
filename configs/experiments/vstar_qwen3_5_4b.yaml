@@ -1,0 +1,7 @@
+# Baseline: Qwen3.5-4B (instruct mode) on V-STaR with the official protocol.
+#   uv run stvg run -c vstar_qwen3_5_4b
+# Local development judge instead of the official 72B:
+#   uv run stvg score -c vstar_qwen3_5_4b judge=qwen2_5_7b_instruct
+model: qwen3_5_4b
+benchmark: vstar
+judge: qwen2_5_72b_instruct

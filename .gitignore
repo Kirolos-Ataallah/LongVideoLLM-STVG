@@ -1,0 +1,21 @@
+# Python / uv
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# Data, checkpoints and experiment outputs (large, reproducible)
+data/
+outputs/
+checkpoints/
+wandb/
+*.log
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

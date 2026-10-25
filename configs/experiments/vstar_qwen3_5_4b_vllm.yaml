@@ -1,0 +1,5 @@
+# Qwen3.5-4B on V-STaR, served by vLLM (same inputs as vstar_qwen3_5_4b, much faster).
+#   uv run stvg run -c vstar_qwen3_5_4b_vllm
+model: qwen3_5_4b_vllm
+benchmark: vstar
+judge: qwen2_5_72b_instruct

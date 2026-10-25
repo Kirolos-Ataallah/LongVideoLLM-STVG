@@ -1,0 +1,76 @@
+[project]
+name = "stvg"
+version = "0.1.0"
+description = "Long video understanding with spatio-temporally grounded answers: models, baselines and evaluation."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+authors = [{ name = "Kirolos Ataallah" }]
+license = { text = "Proprietary" }
+dependencies = [
+    "numpy>=2.0",
+    "omegaconf>=2.4",
+    "pyyaml>=6.0",
+    "tqdm>=4.66",
+    "rich>=13.7",
+    "huggingface_hub[hf_xet]>=0.34",
+    "openai>=1.50",  # client for LLM judges behind OpenAI-compatible servers (vLLM / SGLang / API)
+]
+
+[project.optional-dependencies]
+# Local inference with HuggingFace transformers (Qwen-VL family and friends).
+hf = [
+    "torch>=2.9",
+    "torchvision>=0.24",
+    "transformers>=5.2",
+    "accelerate>=1.10",
+    "qwen-vl-utils[decord]>=0.0.14",
+]
+# Triton kernels for linear-attention layers (Qwen3.5 Gated DeltaNet). Triton compiles a small
+# launcher at runtime: needs a C compiler (`sudo apt install build-essential`) and Python headers
+# (included in uv-managed Pythons). Without them transformers uses a slower torch fallback.
+# causal-conv1d is source-only: it is compiled against the installed torch (see [tool.uv] below)
+# and needs the CUDA toolkit (CUDA_HOME, nvcc matching torch's CUDA major version).
+fast = ["flash-linear-attention>=0.4", "causal-conv1d>=1.6"]
+# High-throughput inference engine (batched generation, prefix caching). Pins torch/transformers.
+# FlashInfer JIT-compiles kernels on first use: needs the CUDA toolkit (nvcc, CUDA_HOME) + ninja.
+vllm = ["vllm>=0.32.0", "ninja>=1.11"]
+
+[project.scripts]
+stvg = "stvg.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.3", "ruff>=0.7", "pre-commit>=4.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/stvg"]
+
+[tool.uv]
+default-groups = ["dev"]
+python-preference = "only-managed"  # uv's standalone CPython ships the headers Triton needs
+link-mode = "copy"                  # uv cache (/) and project (/media) are on different disks
+
+[tool.uv.extra-build-dependencies]
+# Build against the torch in the environment, not a fresh one from an isolated build env.
+causal-conv1d = [{ requirement = "torch", match-runtime = true }, "ninja", "packaging", "wheel"]
+
+[tool.uv.extra-build-variables]
+# Compile locally instead of fetching a prebuilt wheel (none exist for torch 2.13 + CUDA 13);
+# only for the local GPU architecture to keep the build short.
+causal-conv1d = { CAUSAL_CONV1D_FORCE_BUILD = "TRUE", TORCH_CUDA_ARCH_LIST = "12.0", MAX_JOBS = "8" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["E501", "RUF001"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

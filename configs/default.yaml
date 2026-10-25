@@ -1,0 +1,21 @@
+# Global defaults. Every experiment config is merged on top of this file.
+paths:
+  data_root: ${oc.env:STVG_DATA_ROOT,${root:}/data}        # benchmarks live in <data_root>/<benchmark>
+  output_root: ${oc.env:STVG_OUTPUT_ROOT,${root:}/outputs}  # runs live in <output_root>/<run.name>
+
+run:
+  name: null        # defaults to the experiment file name
+  seed: 42
+  log_level: INFO
+
+inference:
+  batch_size: null          # queries per model.generate call; null = model.batch_size (or 1)
+  shard: null               # "i/N": process every N-th video starting at i (multi-GPU)
+  tasks: null               # subset of benchmark tasks; null = all
+  retry_errors: true        # on resume, re-run queries whose generation failed
+  continue_on_error: true   # record failures (e.g. OOM on a very long video) and keep going
+
+scoring:
+  export_official: true     # also write predictions in the benchmark's reference format
+
+judge: null

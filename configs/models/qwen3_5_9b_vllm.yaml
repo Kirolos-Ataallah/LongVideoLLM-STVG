@@ -1,0 +1,7 @@
+# Qwen3.5-9B on vLLM: identical inputs and engine settings to qwen3_5_4b_vllm.
+base: qwen3_5_4b_vllm
+name: qwen3_5_9b_vllm
+model_path: Qwen/Qwen3.5-9B
+engine:
+  # 19.3 GB of weights: give the KV/state cache a little more room on a 32 GB GPU.
+  gpu_memory_utilization: 0.90

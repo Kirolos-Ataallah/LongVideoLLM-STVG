@@ -1,0 +1,31 @@
+# Qwen3.5-4B (natively multimodal, hybrid Gated-DeltaNet / attention LM).
+name: qwen3_5_4b
+type: qwen_vl
+model_path: Qwen/Qwen3.5-4B
+dtype: bfloat16
+attn_implementation: sdpa
+device_map: cuda
+
+# Vision tokenizer: 16px patches, 2x2 merge -> one token per 32x32 px per 2 frames.
+patch_size: 16
+# Qwen3-VL/Qwen3.5 express boxes on a relative 0-1000 grid.
+bbox_format: rel_1000
+video_first: true         # Qwen convention: video before the text in the user turn
+system_prompt: null       # benchmarks may set one
+
+chat_template_kwargs:
+  enable_thinking: false  # baseline in instruct mode; set true to evaluate the thinking mode
+
+# Frame sampling (qwen-vl-utils keys). Same pixel budget as the V-STaR reference setup
+# (1 fps, total_pixels = 20480*28*28 ~ 15.7k visual tokens), capped at 768 frames.
+video:
+  fps: 1.0
+  max_frames: 768
+  min_pixels: 16384         # 16 * 32 * 32
+  total_pixels: 16056320    # 20480 * 28 * 28
+video_cache_size: 2
+video_reader: decord      # qwen-vl-utils backend: decord | torchcodec (needs system FFmpeg) | torchvision
+
+generation:
+  max_new_tokens: 2048
+  do_sample: false

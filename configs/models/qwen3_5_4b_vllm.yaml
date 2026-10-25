@@ -1,0 +1,29 @@
+# Qwen3.5-4B on the vLLM engine. Inherits frame sampling, chat template and generation settings
+# from the transformers config, so both backends see identical inputs.
+base: qwen3_5_4b
+name: qwen3_5_4b_vllm
+type: qwen_vl_vllm
+
+batch_size: 64             # queries per engine call (~13 videos x 5 tasks); vLLM schedules them
+video_loader_threads: 8    # parallel frame decoding per batch
+seed: 0
+
+# Environment switches applied before vLLM is imported (existing variables take precedence).
+env:
+  # FlashInfer's top-k/top-p sampler is JIT-compiled (needs the CUDA toolkit). It never runs for
+  # greedy decoding and measured no speed-up here, so keep vLLM's PyTorch sampler: portable to
+  # machines without nvcc.
+  VLLM_USE_FLASHINFER_SAMPLER: 0
+
+# vllm.LLM(**engine). See https://docs.vllm.ai/en/latest/configuration/engine_args.html
+engine:
+  max_model_len: 32768                  # ~15.7k visual tokens + prompt + 2k answer
+  gpu_memory_utilization: 0.85
+  # Reproducibility vs speed. With prefix caching, whether a video prefix is reused depends on
+  # scheduling timing, which changes bf16 reduction order: only ~50% of greedy answers were
+  # identical across two identical runs. Without it, runs are bit-identical (50/50) at ~1.8x the
+  # inference time. VLLM_BATCH_INVARIANT is not supported for Qwen3.5's GDN layers (vLLM 0.32).
+  # Fast exploratory runs: model.engine.enable_prefix_caching=true
+  enable_prefix_caching: false
+  limit_mm_per_prompt: {image: 0, video: 1}
+  max_num_seqs: 64

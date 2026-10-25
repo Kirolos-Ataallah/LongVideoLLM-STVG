@@ -1,0 +1,4 @@
+# Qwen3.5-9B on transformers: same architecture, processor and sampling as the 4B config.
+base: qwen3_5_4b
+name: qwen3_5_9b
+model_path: Qwen/Qwen3.5-9B
